@@ -65,10 +65,14 @@ public class SingletouchView extends View {
 	paint.setStrokeJoin(Paint.Join.ROUND); 
     }
 
+
+  private float px = 0; 
+  private float py = 0; 
+
   
   @Override
   protected void onDraw(Canvas canvas) {
-      // canvas.drawPath(path, paint);
+    canvas.drawPath(path, paint);
   }
   
   @Override
@@ -77,19 +81,33 @@ public class SingletouchView extends View {
       return true;
   }
   @Override
-  public boolean onTouchEvent(MotionEvent event) {
-      Log.i(TAG, event.toString()) ;
-      float eventX = event.getX();
-      float eventY = event.getY();
- 
+  public boolean onTouchEvent(MotionEvent ev) {
+      // Log.i(TAG, event.toString()) ;
+      float eventX = ev.getX();
+      float eventY = ev.getY();
+      px = eventX; 
+      py = eventY; 
 
-      switch (event.getAction()) {
+      switch (ev.getAction()) {
       case MotionEvent.ACTION_DOWN:
-         
-	  // path.moveTo(eventX, eventY);
+          // path.moveTo(eventX, eventY);
 	  return true;
       case MotionEvent.ACTION_MOVE:
           //Log.i(TAG, event.toString());
+
+	  final int historySize = ev.getHistorySize();
+	  final int pointerCount = ev.getPointerCount();
+	  for (int h = 0; h < historySize; h++) {
+	    for (int p = 0; p < pointerCount; p++) {
+                float nx = ev.getHistoricalX(p,h);
+                float ny = ev.getHistoricalY(p,h);
+                path.moveTo ( px, py);
+ 		path.lineTo( nx , ny );
+                invalidate();
+                 px = nx ; 
+                py = ny; 
+	    }
+	  }
 
 	  // path.lineTo(eventX, eventY);
 	  break;
@@ -101,7 +119,6 @@ public class SingletouchView extends View {
       }
 
       // Schedules a repaint.
-      invalidate();
       return true;
       } 
 
